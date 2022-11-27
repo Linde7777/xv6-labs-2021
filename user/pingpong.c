@@ -15,6 +15,7 @@ int main() {
 
     close(fd[0]);
     write(fd[1], child_buffer, LEN);
+    free(child_buffer);
     exit(0);
   } else {
     close(fd[0]);
@@ -25,6 +26,7 @@ int main() {
     close(fd[1]);
     read(fd[0], parent_buffer, LEN);
     fprintf(2, "%d: received pong\n", getpid());
+    free(parent_buffer);
     exit(0);
   }
 
