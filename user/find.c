@@ -42,7 +42,7 @@ void find(char *filepath, char *filename) {
 
   switch (st.type) {
   case T_FILE:
-    char *curr_filename = fmt(filepath);
+    char *curr_filename = fmtname(filepath);
     if(strcmp(*curr_filename,filename)==0){
       printf("%s %d %d %l\n", *curr_filename, st.type, st.ino, st.size);
     }
