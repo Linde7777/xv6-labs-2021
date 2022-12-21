@@ -39,12 +39,12 @@ void find(char *filepath, char *filename) {
 
   switch (st.type) {
   case T_FILE:
-    //printf("Meet File: %s ",filepath);
+    // printf("Meet File: %s ",filepath);
     printf("%s %d %d %l\n", fmtname(filepath), st.type, st.ino, st.size);
     break;
 
   case T_DIR:
-    //printf("Meet Dir: %s ",filepath);
+    // printf("Meet Dir: %s ",filepath);
     if (strlen(filepath) + 1 + DIRSIZ + 1 > sizeof buf) {
       printf("ls: path too long\n");
       break;
@@ -53,7 +53,7 @@ void find(char *filepath, char *filename) {
     p = buf + strlen(buf);
     *p++ = '/';
     while (read(fd, &de, sizeof(de)) == sizeof(de)) {
-      if(de.name[0]=='.'){
+      if (de.name[0] == '.') {
         continue;
       }
       if (de.inum == 0)
@@ -65,30 +65,27 @@ void find(char *filepath, char *filename) {
         continue;
       }
 
-      //printf("name:%s, type:%d",de.name,st.type);
-      //printf("Enter Dir: %s ",filepath);
-      //printf("filepath: %s ",filepath);
-      //printf("buf: %s ", buf);
-      //printf("de.name:%s ",de.name);
-      //printf("\n");
-      
+      // printf("name:%s, type:%d",de.name,st.type);
+      // printf("Enter Dir: %s ",filepath);
+      // printf("filepath: %s ",filepath);
+      // printf("buf: %s ", buf);
+      // printf("de.name:%s ",de.name);
+      // printf("\n");
+
       /*
       if current de.name is a, and a is a folder
       then we need to go into find(./a, filename)
       */
-      if(st.type==1){
+      if (st.type == T_DIR) {
         find(buf, filename);
-      }else{
+      } else {
         if (strcmp(de.name, filename) == 0) {
-          //printf("FIND IT!!!\n");
-          //printf("It's path(buf):%s\n",buf);
-          printf("%s\n",buf);
-          //printf("%s %d %d %d\n", de.name, st.type, st.ino, st.size);
+          // printf("FIND IT!!!\n");
+          // printf("It's path(buf):%s\n",buf);
+          printf("%s\n", buf);
+          // printf("%s %d %d %d\n", de.name, st.type, st.ino, st.size);
         }
       }
-      
-    
-    
     }
     break;
   }
