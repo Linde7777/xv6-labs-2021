@@ -67,15 +67,23 @@ void find(char *filepath, char *filename) {
 
       //printf("name:%s, type:%d",de.name,st.type);
       //printf("Enter Dir: %s ",filepath);
-      //printf("buf: %s ", buf);
       //printf("filepath: %s ",filepath);
+      //printf("buf: %s ", buf);
+      //printf("de.name:%s ",de.name);
       //printf("\n");
+      
+      /*
+      if current de.name is a, and a is a folder
+      then we need to go into find(./a, filename)
+      */
       if(st.type==1){
-        find(de.name,filename);
+        find(buf, filename);
       }else{
         if (strcmp(de.name, filename) == 0) {
           //printf("FIND IT!!!\n");
-          printf("%s %d %d %d\n", de.name, st.type, st.ino, st.size);
+          //printf("It's path(buf):%s\n",buf);
+          printf("%s\n",buf);
+          //printf("%s %d %d %d\n", de.name, st.type, st.ino, st.size);
         }
       }
       
