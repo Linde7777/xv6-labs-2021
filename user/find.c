@@ -3,22 +3,6 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 
-char *fmtname(char *path) {
-  static char buf[DIRSIZ + 1];
-  char *p;
-
-  // Find first character after last slash.
-  for (p = path + strlen(path); p >= path && *p != '/'; p--)
-    ;
-  p++;
-
-  // Return blank-padded name.
-  if (strlen(p) >= DIRSIZ)
-    return p;
-  memmove(buf, p, strlen(p));
-  memset(buf + strlen(p), ' ', DIRSIZ - strlen(p));
-  return buf;
-}
 
 void find(char *filepath, char *filename) {
   char buf[512], *p;
@@ -40,7 +24,6 @@ void find(char *filepath, char *filename) {
   switch (st.type) {
   case T_FILE:
     // printf("Meet File: %s ",filepath);
-    printf("%s %d %d %l\n", fmtname(filepath), st.type, st.ino, st.size);
     break;
 
   case T_DIR:
@@ -60,6 +43,7 @@ void find(char *filepath, char *filename) {
         continue;
       memmove(p, de.name, DIRSIZ);
       p[DIRSIZ] = 0;
+
       if (stat(buf, &st) < 0) {
         printf("ls: cannot stat %s\n", buf);
         continue;
