@@ -70,17 +70,39 @@ void xargs(char *program_name, char *argument1) {
     printf("program_name:%s\n", program_name);
     printf("argv[0]:%s\n", argv[0]);
     printf("argv[1]:%s\n", argv[1]);
-    if (fork() == 0) {
+
+    // the following code is originally copied 
+    // from user/init.c:26 and has been adapted
+    int pid, wpid;
+    pid = fork();
+    if (pid < 0) {
+      printf("xargs: fork failed\n");
+      exit(1);
+    }
+    if (pid == 0) {
       printf("enter child process\n");
       // program_name:"echo", argv[0]:"echo", argv[1]:"byetoo"
       exec(program_name, argv);
+      printf("xargs: exec failed\n");
+      exit(1);
     }
 
-    printf("test1\n");
-    for (;;) {}
-    printf("test2\n");
-
+    for (;;) {
+      // this call to wait() returns if the shell exits,
+      // or if a parentless process exits.
+      wpid = wait((int *)0);
+      if (wpid == pid) {
+        // the shell exited; restart it.
+        break;
+      } else if (wpid < 0) {
+        printf("init: wait returned an error\n");
+        exit(1);
+      } else {
+        // it was a parentless process; do nothing.
+      }
+    }
   }
+
   free(argument2);
   exit(0);
 }
