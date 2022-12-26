@@ -6,7 +6,7 @@
 void deleteNewLineSymbol(char *s) {
   char *p = s;
   while (*p != '\n') {
-    if(*p=='\0'){
+    if (*p == '\0') {
       exit(0);
     }
     p += 1;
@@ -14,61 +14,73 @@ void deleteNewLineSymbol(char *s) {
   *p = '\0';
 }
 
-char *concat(char *s1, char *s2) {
-  int len1 = strlen(s1);
-  int len2 = strlen(s2);
-  int len3 = len1 + len2;
-  char *s3 = (char *)malloc(sizeof(char) * len3);
-
+void concat(char *s1, char *s2, char *dest) {
+  int len = strlen(s1) + strlen(s2);
+  char *temp = (char *)malloc(sizeof(char) * len);
   char *p1 = s1;
   char *p2 = s2;
-  char *p3 = s3;
+  char *pt = temp;
+
   while (*p1 != '\0') {
-    *p3 = *p1;
-    p3 += 1;
+    *pt = *p1;
+    pt += 1;
     p1 += 1;
   }
   while (*p2 != '\0') {
-    *p3 = *p2;
-    p3 += 1;
+    *pt = *p2;
+    pt += 1;
     p2 += 1;
   }
-  p3 += 1;
-  *p3 = '\0';
+  pt += 1;
+  *pt = '\0';
 
-  return s3;
+  pt = temp;
+  char *pd = dest;
+  while (*pt != '\0') {
+    *pd = *pt;
+    pd += 1;
+    pt += 1;
+  }
+  *pd = '\0';
+
+  free(pt);
 }
 
 void xargs(char *program_name, char *argument1) {
   // TODO: free it
   char *argument2 = (char *)malloc(sizeof(char) * ARGUMENT_LEN);
   while (gets(argument2, ARGUMENT_LEN)) {
-    // TODO: watch out! at the end of argument2, there is a '\n'!!!
-    deleteNewLineSymbol(argument2);
-    printf("1. argument2 before manipulation:%s\n", argument2);
     if (strcmp(argument2, "") == 0) {
-      printf("since argument2 is empty,we gonna exit!\n");
-      free(argument2);
+      printf("empty input from stdin, exit\n");
       exit(0);
     }
 
-    argument2 = concat(" ", argument2);
-    printf("2. argument2 after manipulation:%s\n", argument2);
-    printf("3. enter child process\n");
+    printf("original argument2:%s\n", argument2);
+    deleteNewLineSymbol(argument2);
+    printf("new argument2:%s\n", argument2);
+
+    // TODO: here is a problem
+    concat(" ", argument2, argument2);
+    printf("after adding space to argument2:%s\n", argument2);
+
     char *argv[2];
-    argv[0] = "echo";
-    //argv[1] = concat(argument1, argument2);
-    argv[1]="testtttt";
-    printf("program_name:%s ", program_name);
-    printf("argv[0]:%s ", argv[0]);
-    printf("argv[1]:%s ", argv[1]);
-    printf("now we gonna exec\n");
+    argv[0] = program_name;
+    argv[1] = (char *)malloc(sizeof(char) * ARGUMENT_LEN);
+    concat(argument1, argument2, argv[1]);
+    printf("after concat two argument, argv[1]:%s\n", argv[1]);
+    printf("program_name:%s\n", program_name);
+    printf("argv[0]:%s\n", argv[0]);
+    printf("argv[1]:%s\n", argv[1]);
     if (fork() == 0) {
-      exec("echo", argv);
-    } else {
-      wait(0);
-      printf("parent wait finished\n");
+      printf("enter child process\n");
+      // program_name:"echo", argv[0]:"echo", argv[1]:"byetoo"
+      exec(program_name, argv);
     }
+
+    printf("test1\n");
+    for (;;) {}
+    printf("test2\n");
+
   }
   free(argument2);
   exit(0);
