@@ -59,7 +59,6 @@ void xargs(char *program_name, char *argument1) {
     deleteNewLineSymbol(argument2);
     printf("new argument2:%s\n", argument2);
 
-    // TODO: here is a problem
     concat(" ", argument2, argument2);
     printf("after adding space to argument2:%s\n", argument2);
 
