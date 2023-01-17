@@ -1,124 +1,51 @@
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "user/user.h"
-#define ARGUMENT_LEN 100
+#include "kernel/fs.h"
 
-void deleteNewLineSymbol(char *s) {
-  char *p = s;
-  while (*p != '\n') {
-    if (*p == '\0') {
-      exit(0);
-    }
-    p += 1;
+void run(char *program_name, char *args[]) {
+  if (fork() == 0) { 
+    exec(program_name, args);
   }
-  *p = '\0';
-}
-
-void concat(char *s1, char *s2, char *dest) {
-  int len = strlen(s1) + strlen(s2);
-  char *temp = (char *)malloc(sizeof(char) * len);
-  char *p1 = s1;
-  char *p2 = s2;
-  char *pt = temp;
-
-  while (*p1 != '\0') {
-    *pt = *p1;
-    pt += 1;
-    p1 += 1;
-  }
-  while (*p2 != '\0') {
-    *pt = *p2;
-    pt += 1;
-    p2 += 1;
-  }
-  pt += 1;
-  *pt = '\0';
-
-  pt = temp;
-  char *pd = dest;
-  while (*pt != '\0') {
-    *pd = *pt;
-    pd += 1;
-    pt += 1;
-  }
-  *pd = '\0';
-
-  free(pt);
-}
-
-void xargs(char *program_name, char *argument1) {
-  // TODO: free it
-  char *argument2 = (char *)malloc(sizeof(char) * ARGUMENT_LEN);
-  while (gets(argument2, ARGUMENT_LEN)) {
-    if (strcmp(argument2, "") == 0) {
-      printf("empty input from stdin, exit\n");
-      exit(0);
-    }
-
-    printf("original argument2:%s\n", argument2);
-    deleteNewLineSymbol(argument2);
-    printf("new argument2:%s\n", argument2);
-
-    concat(" ", argument2, argument2);
-    printf("after adding space to argument2:%s\n", argument2);
-
-    char *argv[2];
-    argv[0] = program_name;
-    argv[1] = (char *)malloc(sizeof(char) * ARGUMENT_LEN);
-    concat(argument1, argument2, argv[1]);
-    printf("after concat two argument, argv[1]:%s\n", argv[1]);
-    printf("program_name:%s\n", program_name);
-    printf("argv[0]:%s\n", argv[0]);
-    printf("argv[1]:%s\n", argv[1]);
-
-    // the following code is originally copied 
-    // from user/init.c:26 and has been adapted
-    int pid, wpid;
-    pid = fork();
-    if (pid < 0) {
-      printf("xargs: fork failed\n");
-      exit(1);
-    }
-    if (pid == 0) {
-      printf("enter child process\n");
-      // program_name:"echo", argv[0]:"echo", argv[1]:"byetoo"
-      exec(program_name, argv);
-      printf("xargs: exec failed\n");
-      exit(1);
-    }
-
-    for (;;) {
-      // this call to wait() returns if the shell exits,
-      // or if a parentless process exits.
-      wpid = wait((int *)0);
-      if (wpid == pid) {
-        // the shell exited; restart it.
-        break;
-      } else if (wpid < 0) {
-        printf("init: wait returned an error\n");
-        exit(1);
-      } else {
-        // it was a parentless process; do nothing.
-      }
-    }
-  }
-
-  free(argument2);
-  exit(0);
 }
 
 int main(int argc, char *argv[]) {
-  if (argc <= 1) {
-    printf("Usage 1: xargs program_name\n");
-    printf("Usage 2: xargs program_name program_arguments\n");
-  }
-
+  // the right part of the completed argument is in the stdin
+  char stdin_buffer[1024];
+  char *p_right = stdin_buffer;
+  char completed_argument[2048];
   char *program_name = argv[1];
-  char *argument1 = "";
-  if (argc == 3) {
-    argument1 = argv[2];
+  char *left_part_argument = argv[2];
+
+  char *p_left = left_part_argument;
+  char *p_comp = completed_argument;
+  while (*p_left != '\0') {
+    *p_comp = *p_left;
+    p_left += 1;
+    p_comp += 1;
+  }
+  *p_comp = ' ';
+  p_comp+=1;
+
+  // recall that file descriptor 0 point to standard input
+  while (read(0, p_right, 1) != 0) {
+    if (*p_right != '\n') {
+      *p_comp = *p_right;
+      p_comp += 1;
+    } else {
+      //printf("completed_argument:%s\n", completed_argument);
+      *p_comp='\0';
+      char *args[2];
+      args[0] = program_name;
+      args[1] = completed_argument;
+      printf("args[0]:%s\n",*args);
+      printf("args[1]:%s\n",*(args+1));
+      if(fork()==0){
+        exec(program_name,args);
+      }
+    }
+
   }
 
-  xargs(program_name, argument1);
   exit(0);
 }
