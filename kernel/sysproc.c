@@ -7,6 +7,18 @@
 #include "spinlock.h"
 #include "proc.h"
 
+
+uint64
+sys_trace(void) {
+  struct proc *curr_proc=myproc();
+  int n;
+  if(argint(0, &n) < 0)
+    return -1;
+  
+  curr_proc->mask=n;
+  return 0;
+}
+
 uint64
 sys_exit(void)
 {
