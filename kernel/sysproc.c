@@ -7,6 +7,18 @@
 #include "spinlock.h"
 #include "proc.h"
 
+uint64
+sys_sysinfo(void) {
+  return 0;
+  int n;
+  if(argint(0, &n) < 0)
+    return -1;
+
+  
+  // collect the amount of free memory and number of process
+  // then carryout
+
+}
 
 uint64
 sys_trace(void) {
