@@ -281,14 +281,28 @@ freewalk(pagetable_t pagetable)
   kfree((void*)pagetable);
 }
 
+void print_pagetable_depth(int depth){
+  switch(depth){
+    case 0:
+    printf("..");
+    break;
+
+    case 1:
+    printf(".. ..");
+    break;
+
+    case 2:
+    printf(".. .. ..");
+    break;
+  }
+}
+
 void vmprint_helper(pagetable_t pagetable, int depth) {
   for (int i = 0; i < 512; i++) {
     pte_t pte = pagetable[i];
-    if ((pte & PTE_V) && (pte & (PTE_R | PTE_W | PTE_X)) == 0) {
+    if ((pte & PTE_V) && (pte & PTE_R) == 0) {
       // this PTE points to a lower-level page table.
-      for (int i = 0; i <= depth; i++) {
-        printf("..");
-      }
+      print_pagetable_depth(depth);
       uint64 child = PTE2PA(pte);
       printf("%d: pte %p pa %p\n", i, pte, child);
       vmprint_helper((pagetable_t)child, depth + 1);
