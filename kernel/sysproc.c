@@ -81,46 +81,42 @@ int
 sys_pgaccess(void)
 {
   // lab pgtbl: your code here.
-  uint64 va;
-  int num_of_page;
+  uint64 page_va;
+  int size;
   uint64 user_buffer_addr;
-  if (argaddr(0, &va) < 0) {
+  
+  if(argaddr(0, &page_va) < 0){
     return -1;
   }
-
-  if (argint(1, &num_of_page) < 0) {
+  if(argint(1, &size) < 0){
     return -1;
   }
-
-  if (argaddr(2, &user_buffer_addr) < 0) {
+  if(argaddr(2, &user_buffer_addr) < 0){
     return -1;
   }
-
-  if (num_of_page > 32 || num_of_page < 0) {
-    return -1;
-  }
-
+  
   struct proc *p = myproc();
-  int local_buffer;
-  for (int i = 0; i < num_of_page; i++) {
-    // clangd will report it as an error, ignore it
-    pte_t *pte = walk(p->pagetable, va + i * PGSIZE, 0);
-    if (pte && (*pte & PTE_A)) {
-      local_buffer |= (1 << i);
-      *pte ^= PTE_A;
+  uint32 local_buffer = 0;
+  uint64 true_page_va;
+  true_page_va = PGROUNDDOWN(page_va);
+  for(int i = 0; i < size && true_page_va < MAXVA; i++, true_page_va += PGSIZE){
+    pte_t *pte = walk(p->pagetable, true_page_va, 0);
+    if(pte){
+      if(*pte & PTE_A){
+        local_buffer |= (1 << i);
+        *pte ^= PTE_A;
+      }
     }
   }
-
-  char *p_local_buffer = (char *)&local_buffer;
-  copyout(p->pagetable, user_buffer_addr, p_local_buffer, sizeof(local_buffer));
-
-  // TODO: copy the newest code to pgaccess()
+  
+  copyout(p->pagetable, user_buffer_addr, (char*)&local_buffer, sizeof(local_buffer));
   return 0;
 }
 #endif
 
 int
 temp(void){
+  /*
   uint64 va;
   int num_of_page;
   uint64 user_buffer_addr;
@@ -140,24 +136,25 @@ temp(void){
     return -1;
   }
 
-  struct proc *p = myproc();
   int local_buffer;
-  for (int i = 0; i < num_of_page; i++) {
-    pgaccess_helper(p->pagetable, va+i*PGSIZE, &local_buffer);
-    /*
-    pte_t *pte = walk(p->pagetable, va + i * PGSIZE, 0);
-    if (pte && (*pte & PTE_A)) {
-      local_buffer |= (1 << i);
-      *pte ^= PTE_A;
+  struct proc *p = myproc();
+  uint64 s;
+  s = PGROUNDDOWN(va);
+  for(int i = 0; i < num_of_page&& s < MAXVA; i++, s += PGSIZE){
+    pte_t *pte = walk(p->pagetable, s, 0);
+    if(pte){
+      if(*pte & PTE_A){
+        local_buffer |= (1 << i);
+        *pte ^= PTE_A;
+      }
     }
-    */
   }
-
   char *p_local_buffer = (char *)&local_buffer;
   copyout(p->pagetable, user_buffer_addr, p_local_buffer, sizeof(local_buffer));
 
-  // TODO: copy the newest code to pgaccess()
+  // todo: copy the newest code to sys_pgaccess()
   return 0;
+  */
 }
 
 uint64
