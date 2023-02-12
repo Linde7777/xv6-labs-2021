@@ -114,49 +114,6 @@ sys_pgaccess(void)
 }
 #endif
 
-int
-temp(void){
-  /*
-  uint64 va;
-  int num_of_page;
-  uint64 user_buffer_addr;
-  if (argaddr(0, &va) < 0) {
-    return -1;
-  }
-
-  if (argint(1, &num_of_page) < 0) {
-    return -1;
-  }
-
-  if (argaddr(2, &user_buffer_addr) < 0) {
-    return -1;
-  }
-
-  if (num_of_page > 32 || num_of_page < 0) {
-    return -1;
-  }
-
-  int local_buffer;
-  struct proc *p = myproc();
-  uint64 s;
-  s = PGROUNDDOWN(va);
-  for(int i = 0; i < num_of_page&& s < MAXVA; i++, s += PGSIZE){
-    pte_t *pte = walk(p->pagetable, s, 0);
-    if(pte){
-      if(*pte & PTE_A){
-        local_buffer |= (1 << i);
-        *pte ^= PTE_A;
-      }
-    }
-  }
-  char *p_local_buffer = (char *)&local_buffer;
-  copyout(p->pagetable, user_buffer_addr, p_local_buffer, sizeof(local_buffer));
-
-  // todo: copy the newest code to sys_pgaccess()
-  return 0;
-  */
-}
-
 uint64
 sys_kill(void)
 {
