@@ -87,8 +87,9 @@ struct proc {
   struct spinlock lock;
 
   // for sys_sigalarm
-  int interval;
+  int interval;       // every interval, we call to a handler function
   void (*handler)();
+  int time;           // the ticks have passed since the last call
 
   // p->lock must be held when using these:
   enum procstate state;        // Process state
