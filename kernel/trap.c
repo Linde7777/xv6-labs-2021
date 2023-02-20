@@ -84,7 +84,11 @@ usertrap(void)
       if (p->ticks_count == p->interval) {
         p->ticks_count = 0;
         p->trapframe->epc = (uint64)p->handler;
-        // we don't need to deal with p->trapframe->ra
+        // we don't need to deal with p->trapframe->ra,
+        // because in RISC-V a "ret" instruction essentially 
+        // is set pc to the value that stored in ra.
+        // When handler function execute "ret", it will return
+        // to the original user code.
       }
     }
     yield();
