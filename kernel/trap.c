@@ -78,15 +78,14 @@ usertrap(void)
 
   // give up the CPU if this is a timer interrupt.
   if(which_dev == 2){
-    //printf("---enter kernel timer interrupt\n");
     struct proc *p = myproc();
-    p->ticks_count += 1;
-    // printf("---ticks_count:%d\n", p->ticks_count);
-    // printf("---interval:%d\n", p->interval);
-    if (p->interval != 0 && p->ticks_count == p->interval) {
-      p->ticks_count = 0;
-      p->trapframe->epc = (uint64)p->handler;
-      // we don't need to deal with p->trapframe->ra
+    if (p->interval != 0) {
+      p->ticks_count += 1;
+      if (p->ticks_count == p->interval) {
+        p->ticks_count = 0;
+        p->trapframe->epc = (uint64)p->handler;
+        // we don't need to deal with p->trapframe->ra
+      }
     }
     yield();
   }
