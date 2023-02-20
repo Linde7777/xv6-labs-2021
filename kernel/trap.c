@@ -85,9 +85,8 @@ usertrap(void)
     // printf("---interval:%d\n", p->interval);
     if (p->interval != 0 && p->ticks_count == p->interval) {
       p->ticks_count = 0;
-      uint64 original_epc = p->trapframe->epc;
       p->trapframe->epc = (uint64)p->handler;
-      p->trapframe->ra = original_epc;
+      // we don't need to deal with p->trapframe->ra
     }
     yield();
   }
