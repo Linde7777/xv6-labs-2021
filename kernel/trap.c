@@ -89,7 +89,7 @@ usertrap(void)
         // p->interval will be restored by sys_sigreturn
         p->interval = 0;
 
-        // the call to handler will change current trapframe,
+        // the call to handler() will change current trapframe,
         // we need to save it to recover the original status.
         uint64 backup_epc = p->trapframe->epc;
         p->trapframe->epc = (uint64)p->handler;
