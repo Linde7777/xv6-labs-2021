@@ -344,7 +344,7 @@ sfence_vma()
 #define PTE_X (1L << 3)
 #define PTE_U (1L << 4) // 1 -> user can access
 #define PTE_A (1L << 6) // go to https://riscv.org/wp-content/uploads/2017/05/riscv-privileged-v1.10.pdf
-                        // figure 4.15 at page 70
+                        // figure 4.16 at page 73(Sv39 version, since xv6 is in Sv39)
 
 // shift a physical address to the right place for a PTE.
 #define PA2PTE(pa) ((((uint64)pa) >> 12) << 10)
