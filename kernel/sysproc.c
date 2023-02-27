@@ -7,8 +7,11 @@
 #include "spinlock.h"
 #include "proc.h"
 
-uint64
-sys_sigreturn(void){
+uint64 
+sys_sigreturn(void) {
+  struct proc *p = myproc();
+  p->interval = p->backup_interval;
+  memmove(p->trapframe, p->backup_trapframe, sizeof(struct trapframe));
   return 0;
 }
 
@@ -26,6 +29,7 @@ sys_sigalarm(void){
 
   struct proc* p=myproc();
   p->interval=interval;
+  p->backup_interval=interval;
   p->handler=(void*)function_addr;
 
   return 0;

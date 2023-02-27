@@ -84,12 +84,14 @@ enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
 // Per-process state
 struct proc {
-  struct spinlock lock;
-
   // for sys_sigalarm
   int interval;       // every interval, we call to a handler function
+  int backup_interval;      
   void (*handler)();
   int ticks_count;         // the ticks have passed since the last call
+  struct trapframe* backup_trapframe; 
+
+  struct spinlock lock;
 
   // p->lock must be held when using these:
   enum procstate state;        // Process state

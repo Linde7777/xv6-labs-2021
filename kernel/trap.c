@@ -83,12 +83,18 @@ usertrap(void)
       p->ticks_count += 1;
       if (p->ticks_count == p->interval) {
         p->ticks_count = 0;
+
+        // when a handler() hasn't finished, we shouldn't call another handler,
+        // so I set p->interval=0 to disable calling to handler().
+        // p->interval will be restored by sys_sigreturn
+        p->interval = 0;
+
+        // the call to handler will change current trapframe,
+        // we need to save it to recover the original status.
+        uint64 backup_epc = p->trapframe->epc;
         p->trapframe->epc = (uint64)p->handler;
-        // we don't need to deal with p->trapframe->ra,
-        // because in RISC-V a "ret" instruction essentially 
-        // is set pc to the value that stored in ra.
-        // When handler function execute "ret", it will return
-        // to the original user code.
+        memmove(p->backup_trapframe, p->trapframe, sizeof(struct trapframe));
+        p->backup_trapframe->epc = backup_epc;
       }
     }
     yield();
