@@ -326,6 +326,50 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
   return -1;
 }
 
+int
+is_COW_page(pagetable_t pagetable,uint64 va){
+  va=PGROUNDDOWN(va);
+  pte_t *pte = walk(pagetable, va, 0);
+  if (*pte & PTE_COW) {
+    return 1;
+  }
+
+  return 0;
+}
+
+int 
+realloc_COW_page(pagetable_t pagetable, uint64 va) {
+  va = PGROUNDDOWN(va);
+  pte_t *pte = walk(pagetable, va, 0);
+  *pte |= PTE_W;
+  *pte &= (~PTE_COW); // seems unnecessary
+
+  uint64 pa = PTE2PA(*pte);
+  uint flags=PTE_FLAGS(*pte);
+
+  char *mem;
+  if ((mem = kalloc()) == 0) {
+    return -1;
+  }
+  memmove(mem, (char *)pa, PGSIZE);
+  
+  // TODO: free the old physical page? other process
+  // (child or parent) may still map it
+  uvmunmap(pagetable, va, 1, 0);
+
+  if(mappages(pagetable, va, PGSIZE, (uint64)mem, flags)!=0){
+      kfree(mem);
+      goto err;
+  }
+
+  return 0;
+
+
+  err:
+  uvmunmap(pagetable, 0, va / PGSIZE, 1);
+  return -1;
+}
+
 // mark a PTE invalid for user access.
 // used by exec for the user stack guard page.
 void
