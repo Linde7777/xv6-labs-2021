@@ -66,8 +66,9 @@ usertrap(void)
 
     syscall();
   } else if(r_scause()==13||r_scause()==15){
-    if(is_COW_page()){
-      if(realloc_COW_page()<0){
+    uint64 va=r_stval();
+    if(is_COW_page(p->pagetable,va)){
+      if(realloc_COW_page(p->pagetable,va)<0){
         printf("realloc failed\n");
       }
     }
